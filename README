@@ -1,3 +1,7 @@
+trawls a directory of .clj files for namespace forms, and outputs a graph of
+the information from those forms. the graph is in the graphviz dot language,
+so you can run dot on it to get a nice svg out.
+
 example:
 if you have a checkout of ring in ~/ring/
 java clojure.main ring/ ring.dot
