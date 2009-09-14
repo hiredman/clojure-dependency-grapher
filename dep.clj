@@ -31,13 +31,12 @@
     ((partial filter #(and (coll? %) (= :use (first %)))))
     ((partial map rest))
     ((partial apply concat))
+    ((partial map #(if (vector? %) (first %) %)))
     ((partial mapcat
               (fn [x]
                 (if (coll? x)
                   (map #(symbol (str (name (first x)) "." (name %))) (rest x))
                   [x]))))))
-
-
 
 (defn get-import [ns-form]
   (-> ns-form
@@ -69,7 +68,8 @@
 
 
 (defn parse-directory [dir]
-  (reduce #(assoc % (:name %2) (dissoc %2 :name)) {} (map (comp parse read-ns) (all-clojure-files dir))))
+  (reduce #(assoc % (:name %2) (dissoc %2 :name)) {}
+          (map parse (remove nil? (map read-ns (all-clojure-files dir))))))
 
 (defn restructure [files]
 (reduce
@@ -113,4 +113,5 @@
   ((fn [out]
      (binding [*out* (-> (second *command-line-args*) java.io.File. java.io.FileWriter.)]
        (println out)))))
+
 
