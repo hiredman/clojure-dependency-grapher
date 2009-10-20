@@ -21,7 +21,12 @@
   (mapcat
     (fn [x]
       (if (list? x)
-        (map #(symbol (str (name (first x)) "." (name %))) (rest x))
+        (map #(symbol (str (name (first x))
+                           "."
+                           (name
+                             (if (vector? %)
+                               (first %)
+                               %)))) (rest x))
         (list x)))
     (map #(if (vector? %) (first %) %) (mapcat rest (filter #(and (or (vector? %) (list? %)) (= :require (first %))) ns-form))))))
 
@@ -35,7 +40,12 @@
     ((partial mapcat
               (fn [x]
                 (if (coll? x)
-                  (map #(symbol (str (name (first x)) "." (name %))) (rest x))
+                  (map #(symbol (str (name (first x))
+                                     "."
+                                     (name
+                                       (if (vector? %)
+                                         (first %)
+                                         %)))) (rest x))
                   [x]))))))
 
 (defn get-import [ns-form]
