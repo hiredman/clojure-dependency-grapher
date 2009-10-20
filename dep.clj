@@ -82,7 +82,12 @@
              (fn [x]
                (reduce str (map #(format "%s->%s;\n" (safe-name (first %)) (safe-name (second %))) x)))))
 
-(-> (first *command-line-args*)
+(defn out [out]
+  (binding [*out* (-> (second *command-line-args*) java.io.File. java.io.FileWriter.)]
+    (println out)))
+
+(-> *command-line-args*
+  first
   File.
   find-ns-decls-in-dir
   ((partial map parse))
@@ -92,7 +97,5 @@
   (safe-name-and-label :clojure)
   edges
   dot
-  ((fn [out]
-     (binding [*out* (-> (second *command-line-args*) java.io.File. java.io.FileWriter.)]
-       (println out)))))
+  out)
 
