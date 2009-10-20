@@ -1,20 +1,6 @@
-(ns hiredman.deps)
-
-
-(defn ffile [file]
-  (if (string? file)
-    (java.io.File. file)
-    file))
-
-(defn read-ns [file]
-  (with-open [f (-> file ffile java.io.FileReader.
-                java.io.PushbackReader.)]
-    (binding [*in* f]
-      (let [x (read)]
-        (if (= (first x) 'ns)
-          x
-          nil)))))
-
+(ns hiredman.deps
+  (:use [clojure.contrib.find-namespaces :only (find-ns-decls-in-dir)])
+  (:import (java.io File)))
 
 (defn get-required [ns-form]
   (set
@@ -65,22 +51,6 @@
                             (get-used ns-form))
    :java-depends (get-import ns-form)})
 
-(defn all-clojure-files [root]
-  (let [root (ffile root)]
-    (if (.isDirectory root)
-      (mapcat all-clojure-files (.listFiles root
-                                            (proxy [java.io.FilenameFilter] []
-                                              (accept [dir name]
-                                                      (or (.endsWith name ".clj")
-                                                          (.isDirectory (java.io.File. dir name)))))))
-      [root])))
-
-
-
-(defn parse-directory [dir]
-  (reduce #(assoc % (:name %2) (dissoc %2 :name)) {}
-          (map parse (remove nil? (map read-ns (all-clojure-files dir))))))
-
 (defn restructure [files]
 (reduce
   (fn [map- dep]
@@ -112,9 +82,11 @@
              (fn [x]
                (reduce str (map #(format "%s->%s;\n" (safe-name (first %)) (safe-name (second %))) x)))))
 
-
-(-> (first *command-line-args*) parse-directory
-  ((partial remove (comp nil? first)))
+(-> (first *command-line-args*)
+  File.
+  find-ns-decls-in-dir
+  ((partial map parse))
+  ((partial reduce #(assoc % (:name %2) (dissoc %2 :name)) {}))
   restructure
   (safe-name-and-label :java)
   (safe-name-and-label :clojure)
@@ -123,5 +95,4 @@
   ((fn [out]
      (binding [*out* (-> (second *command-line-args*) java.io.File. java.io.FileWriter.)]
        (println out)))))
-
 
