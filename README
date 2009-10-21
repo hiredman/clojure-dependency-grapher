@@ -4,5 +4,5 @@ so you can run dot on it to get a nice svg out.
 
 example:
 if you have a checkout of ring in ~/ring/
-java clojure.main ring/ ring.dot
+java clojure.main deps.clj ring/ ring.dot
 dot ring.dot -Tsvg -o ring.svg
