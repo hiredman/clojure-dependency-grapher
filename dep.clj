@@ -32,7 +32,8 @@
                                        (if (vector? %)
                                          (first %)
                                          %)))) (rest x))
-                  [x]))))))
+                  [x]))))
+    ((partial remove keyword?))))
 
 (defn get-import [ns-form]
   (-> ns-form
