@@ -1,4 +1,6 @@
-(ns hiredman.deps)
+(ns leiningen.depgraph
+  "Generate a namespace dependency graph as an svg file"
+  (:use [clojure.java.shell :only [sh]]))
 
 
 (defn ffile [file]
@@ -113,16 +115,21 @@
              (fn [x]
                (reduce str (map #(format "%s->%s;\n" (safe-name (first %)) (safe-name (second %))) x)))))
 
-
-(-> (first *command-line-args*) parse-directory
-  ((partial remove (comp nil? first)))
-  restructure
-  (safe-name-and-label :java)
-  (safe-name-and-label :clojure)
-  edges
-  dot
-  ((fn [out]
-     (binding [*out* (-> (second *command-line-args*) java.io.File. java.io.FileWriter.)]
-       (println out)))))
+(defn depgraph
+  "Generate a namespace dependency graph as svg file"
+  [project]
+  (let [source-path (:source-path project "src")
+        dotfile (str (:name project) ".dot")
+        svgfile (str (:name project) ".svg")]
+    (-> source-path
+        parse-directory
+        ((partial remove (comp nil? first)))
+        restructure
+        (safe-name-and-label :java)
+        (safe-name-and-label :clojure)
+        edges
+        dot
+        ((partial spit dotfile)))
+    (sh "dot" "-Tsvg" (str "-o" svgfile ) dotfile) ))
 
 
