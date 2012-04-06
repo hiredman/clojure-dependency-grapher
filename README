@@ -2,7 +2,23 @@ trawls a directory of .clj files for namespace forms, and outputs a graph of
 the information from those forms. the graph is in the graphviz dot language,
 so you can run dot on it to get a nice svg out.
 
-example:
-if you have a checkout of ring in ~/ring/
-java clojure.main deps.clj ring/ ring.dot
-dot ring.dot -Tsvg -o ring.svg
+
+Installation: 
+
+
+   lein plugin install org.clojars.kurtharriger/lein-depgraph 0.1.0
+
+Usage:
+
+   lein depgraph
+   open <projectname>.svg
+
+Dependencies:
+
+  graphviz
+
+  dot  must be on your path to convert the .dot file to .svg file.
+
+  For OS X users, graphviz can be installed with homebrew
+  brew install graphviz
+
